@@ -8,6 +8,20 @@ endif()
 
 project ("AudioTest")
 
+# Pre-configure step: Run pre-configure.cmake
+# execute_process(
+#     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/pre-configure.cmake
+#     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+#     RESULT_VARIABLE pre_configure_result
+# )
+
+# Check if the pre-configure step succeeded
+# if(NOT pre_configure_result EQUAL 0)
+#     message(FATAL_ERROR "Pre-configure step failed with exit code ${pre_configure_result}")
+# else()
+#     message(STATUS "Running pre-configure step successfull")
+# endif()
+
 # Add source to this project's executable.
 add_executable (AudioTest "AudioTest.cpp" "AudioTest.h")
 
@@ -21,5 +35,3 @@ endif()
 # Find and link fmt library
 find_package(fmt REQUIRED)
 target_link_libraries(AudioTest PRIVATE fmt::fmt)
-
-# TODO: Add tests and install targets if needed.

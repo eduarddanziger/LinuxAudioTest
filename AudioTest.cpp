@@ -16,32 +16,31 @@ using MixerHandleRaiiPtr = std::unique_ptr<snd_mixer_t, MixerHandleDeleter>;
 
 int main() {
     // Check and output PULSE_SERVER environment variable
-    const char* pulse_server = std::getenv("PULSE_SERVER");
-    if (pulse_server) {
-        fmt::print("PULSE_SERVER: {}\n", pulse_server);
-    } else {
+    if (const char * pulseServerName = std::getenv("PULSE_SERVER"))  // NOLINT(concurrency-mt-unsafe)
+    {
+        fmt::print("PULSE_SERVER: {}\n", pulseServerName);
+    }
+    else
+    {
         fmt::print("PULSE_SERVER environment variable is not set.\n");
     }
 
-    long min, max, current_volume;
-    snd_mixer_selem_id_t* sid;
-    const char* card = "default";  // Standardgerät
-    const char* selem_name = "Master";
+    long minVolume, maxVolume, currentVolume;
+    snd_mixer_selem_id_t* simpleMixerElementId;
 
     int err;
 
     MixerHandleRaiiPtr handleSmartPtr;
-
     {
-        snd_mixer_t* handle_tmp;
-        if ((err = snd_mixer_open(&handle_tmp, 0)) < 0) {
+        snd_mixer_t* handleTmp;
+        if ((err = snd_mixer_open(&handleTmp, 0)) < 0) {
             fmt::print("Error opening mixer: {}\n", snd_strerror(err));
             return 1;
         }
-        handleSmartPtr = MixerHandleRaiiPtr(handle_tmp);
+        handleSmartPtr = MixerHandleRaiiPtr(handleTmp);
     }
 
-    if ((err = snd_mixer_attach(handleSmartPtr.get(), card)) < 0) {
+    if ((err = snd_mixer_attach(handleSmartPtr.get(), "default")) < 0) {
         fmt::print("Error attaching mixer: {}\n", snd_strerror(err));
         return 1;
     }
@@ -56,27 +55,41 @@ int main() {
         return 1;
     }
 
-    snd_mixer_selem_id_malloc(&sid);
-    snd_mixer_selem_id_set_index(sid, 0);
-    snd_mixer_selem_id_set_name(sid, selem_name);
+    snd_mixer_selem_id_malloc(&simpleMixerElementId);
+    snd_mixer_selem_id_set_index(simpleMixerElementId, 0);
+    snd_mixer_selem_id_set_name(simpleMixerElementId, "Master");
 
-    snd_mixer_elem_t* elem = snd_mixer_find_selem(handleSmartPtr.get(), sid);
-
-    if (!elem) {
+    snd_mixer_elem_t* mixerElement = snd_mixer_find_selem(handleSmartPtr.get(), simpleMixerElementId);
+    if (!mixerElement) {
 	    fmt::print("Element not found!\n");
         return 2;
     }
 
-    snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
-    if ((err = snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_FRONT_LEFT, &current_volume)) < 0) {
+    if ((err = snd_mixer_selem_get_playback_volume_range(mixerElement, &minVolume, &maxVolume)) < 0) {
+        fmt::print("Error getting min / max volume: {}\n", snd_strerror(err));
+        snd_mixer_selem_id_free(simpleMixerElementId);
+        return 1;
+    }
+
+
+    if ((err = snd_mixer_selem_get_playback_volume(mixerElement, SND_MIXER_SCHN_FRONT_LEFT, &currentVolume)) < 0) {
 	    fmt::print("Error getting current volume: {}\n", snd_strerror(err));
-	    snd_mixer_selem_id_free(sid);
+	    snd_mixer_selem_id_free(simpleMixerElementId);
 	    return 1;
     }
-    const long volume = max / 2;  // Setze Lautstärke auf 50%
-    snd_mixer_selem_set_playback_volume_all(elem, volume);
-    fmt::print("Volume set to {}\n", volume);
 
-    snd_mixer_selem_id_free(sid);
+    fmt::print("Current volume is: {}, between min {} and max {}.\n", currentVolume, minVolume, maxVolume);
+    fmt::print("Setting volume to half a current volume {}. If it gets less or equal to the maximum divided by 10, namely {}, set it to half a maximum {}.\n", currentVolume / 2, maxVolume / 10, maxVolume / 2);
+
+    long newVolume = currentVolume / 2;
+    if (newVolume <= maxVolume / 10)
+    {
+        newVolume = maxVolume / 2;
+    }
+
+    snd_mixer_selem_set_playback_volume_all(mixerElement, newVolume);
+    fmt::print("Volume set to {}\n", newVolume);
+
+    snd_mixer_selem_id_free(simpleMixerElementId);
     return 0;
 }

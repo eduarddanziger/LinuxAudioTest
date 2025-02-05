@@ -34,4 +34,5 @@ endif()
 
 # Find and link fmt library
 find_package(fmt REQUIRED)
+target_include_directories(AudioTest PRIVATE "/usr/include/fmt")
 target_link_libraries(AudioTest PRIVATE fmt::fmt)

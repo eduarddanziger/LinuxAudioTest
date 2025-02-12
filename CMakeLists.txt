@@ -62,17 +62,3 @@ add_custom_target(
     COMMAND ${CMAKE_CPACK_COMMAND} -G DEB
     DEPENDS AudioTest
 )
-
-# Pre-configure step: Run pre-configure.cmake
-# execute_process(
-#     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/pre-configure.cmake
-#     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-#     RESULT_VARIABLE pre_configure_result
-# )
-
-# Check if the pre-configure step succeeded
-# if(NOT pre_configure_result EQUAL 0)
-#     message(FATAL_ERROR "Pre-configure step failed with exit code ${pre_configure_result}")
-# else()
-#     message(STATUS "Running pre-configure step successfull")
-# endif()

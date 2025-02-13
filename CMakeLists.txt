@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.29)
 
-# set(CMAKE_CXX_COMPILER "/usr/bin/g++")
-
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
   message(STATUS "Detected POLICY CMP0141, set it to NEW.")
@@ -14,7 +12,7 @@ endif()
 project("AudioTest")
 
 # Add source to this project's executable.
-add_executable(AudioTest "AudioTest.cpp" "AudioTest.h")
+add_executable(AudioTest "AudioTest.cpp")
 
 # Enforce out-of-source builds
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
@@ -71,14 +69,8 @@ install(TARGETS AudioTest DESTINATION bin)
 # Include CPack to enable packaging
 include(CPack)
 
-if (POLICY CMP0141)
-    message(STATUS "Detected POLICY CMP0141, it's probably Microsoft. Enable DEB-file generation^.")
-    add_custom_target(
-        package_deb ALL
-        COMMAND ${CMAKE_CPACK_COMMAND} -G DEB
-        DEPENDS AudioTest
-    )
-else()
-    message(STATUS "No POLICY CMP0141 detected. It's probably NOT Microsoft. No DEB-file generation")
-endif()
-
+add_custom_command(
+    TARGET AudioTest POST_BUILD
+    COMMAND ${CMAKE_CPACK_COMMAND} -G DEB
+    COMMENT "Generating DEB package"
+)

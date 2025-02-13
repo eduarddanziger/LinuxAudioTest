@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.29)
 
+set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -10,6 +12,15 @@ project("AudioTest")
 
 # Add source to this project's executable.
 add_executable(AudioTest "AudioTest.cpp" "AudioTest.h")
+
+# Enforce out-of-source builds
+if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+    message(FATAL_ERROR "In-source builds are not allowed. Please create a separate build directory.")
+endif()
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+set(CMAKE_BUILD_TYPE Debug)
 
 find_package(fmt REQUIRED)
 
@@ -57,8 +68,10 @@ install(TARGETS AudioTest DESTINATION bin)
 # Include CPack to enable packaging
 include(CPack)
 
-add_custom_target(
-    package_deb ALL
-    COMMAND ${CMAKE_CPACK_COMMAND} -G DEB
-    DEPENDS AudioTest
-)
+# Commented out the custom target for creating a DEB package
+# add_custom_target(
+#     package_deb ALL
+#     COMMAND ${CMAKE_CPACK_COMMAND} -G DEB
+#     DEPENDS AudioTest
+# )
+

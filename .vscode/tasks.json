@@ -45,6 +45,37 @@
       },
       "dependsOn": "CMake Configure",
       "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Clear Build Directory",
+      "type": "shell",
+      "command": "rm",
+      "args": [
+        "-rf",
+        "${workspaceFolder}/build"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "CMake Rebuild",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "."
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/build"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "dependsOn": [
+        "Clear Build Directory",
+        "CMake Configure"
+      ],
+      "problemMatcher": ["$gcc"]
     }
   ]
 }

@@ -4,8 +4,11 @@ cmake_minimum_required(VERSION 3.29)
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
+  message(STATUS "Detected POLICY CMP0141, set it to NEW.")
   cmake_policy(SET CMP0141 NEW)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+else()
+  message(STATUS "No POLICY CMP0141 detected.")
 endif()
 
 project("AudioTest")
@@ -68,10 +71,14 @@ install(TARGETS AudioTest DESTINATION bin)
 # Include CPack to enable packaging
 include(CPack)
 
-# Commented out the custom target for creating a DEB package
-# add_custom_target(
-#     package_deb ALL
-#     COMMAND ${CMAKE_CPACK_COMMAND} -G DEB
-#     DEPENDS AudioTest
-# )
+if (POLICY CMP0141)
+    message(STATUS "Detected POLICY CMP0141, it's probably Microsoft. Enable DEB-file generation^.")
+    add_custom_target(
+        package_deb ALL
+        COMMAND ${CMAKE_CPACK_COMMAND} -G DEB
+        DEPENDS AudioTest
+    )
+else()
+    message(STATUS "No POLICY CMP0141 detected. It's probably NOT Microsoft. No DEB-file generation")
+endif()
 

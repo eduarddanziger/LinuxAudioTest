@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -48,6 +49,7 @@ jobs:
         overwrite: true
 
   publish:
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     steps:

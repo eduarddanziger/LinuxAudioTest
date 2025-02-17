@@ -66,6 +66,7 @@ jobs:
       run: |
         echo "${{ secrets.MY_PAT }}" | gh auth login --with-token
         DEB_FILE=$(ls build/*.deb)
+        echo $DEB_FILE
         curl -X POST \
           -H "Authorization: token ${{ secrets.MY_PAT }}" \
           -H "Content-Type: $(file --mime-type -b "$DEB_FILE")" \

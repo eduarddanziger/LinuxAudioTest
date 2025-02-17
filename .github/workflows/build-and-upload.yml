@@ -39,22 +39,18 @@ jobs:
           exit 0
         fi
         echo "LATEST_TAG: $LATEST_TAG"
-
         # Extract version number from the tag (e.g., Release-1.0.1 -> 1.0.1)
         VERSION_NUMBER=$(echo "$LATEST_TAG" | sed 's/^Release-//')
         echo "VERSION_NUMBER: $VERSION_NUMBER"
-
         # Get the distance since the latest tag
         DISTANCE=$(git rev-list --count "$LATEST_TAG"..HEAD)
         echo "DISTANCE: $DISTANCE"
-
         # Append -SP<distance> if distance is greater than 0
         if [ "$DISTANCE" -gt 0 ]; then
           VERSION="$VERSION_NUMBER-SP$DISTANCE"
         else
           VERSION="$VERSION_NUMBER"
         fi
-
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         echo "Using version: $VERSION"
 

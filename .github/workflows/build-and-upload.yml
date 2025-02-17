@@ -54,8 +54,5 @@ jobs:
 
     - name: Publish DEB package to GitHub Packages
       run: |
-        unset GITHUB_TOKEN
-        echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+        echo "${{ secrets.MY_PAT }}" | gh auth login --with-token
         gh release create "v1.0.0" build/*.deb --title "AudioTest v1.0.0" --notes "Release of AudioTest v1.0.0"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

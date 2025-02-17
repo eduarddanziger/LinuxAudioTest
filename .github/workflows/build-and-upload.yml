@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'Release-*'
   pull_request:
     branches:
       - main
@@ -51,6 +53,9 @@ jobs:
         echo "DISTANCE: $DISTANCE"
         # Append -SP<distance> if distance is greater than 0
         if [ "$DISTANCE" -gt 0 ]; then
+          # Increment the third number
+          VERSION_NUMBER=$(echo "$VERSION_NUMBER" | awk -F. -v OFS=. '{$3++; print}')
+          # Add SP info
           VERSION="$VERSION_NUMBER-SP$DISTANCE"
         else
           VERSION="$VERSION_NUMBER"

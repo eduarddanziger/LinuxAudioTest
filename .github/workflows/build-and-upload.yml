@@ -65,4 +65,8 @@ jobs:
     - name: Publish DEB package to GitHub Packages
       run: |
         echo "${{ secrets.MY_PAT }}" | gh auth login --with-token
-        gh package upload --package-type deb --package-name AudioTest --package-version 1.0.0 build/*.deb
+        curl -X POST \
+          -H "Authorization: token ${{ secrets.MY_PAT }}" \
+          -H "Content-Type: $(file --mime-type -b build/*.deb)" \
+          --data-binary @build/*.deb \
+          "https://uploads.github.com/repos/${{ github.repository }}/releases/latest/assets?name=$(basename build/*.deb)"

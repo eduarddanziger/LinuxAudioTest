@@ -28,8 +28,35 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ninja-build libasound2-dev libfmt-dev libspdlog-dev
 
+    - name: Get version from Git tags
+      id: get_version
+      run: |
+        # Get the latest Release tag
+        LATEST_TAG=$(git describe --tags --match "Release-*" --abbrev=0)
+        if [ -z "$LATEST_TAG" ]; then
+        echo "No Release tag found. Using default version."
+        echo "VERSION=1.0.0" >> $GITHUB_OUTPUT
+        exit 0
+        fi
+
+        # Extract version number from the tag (e.g., Release-1.0.1 -> 1.0.1)
+        VERSION_NUMBER=$(echo "$LATEST_TAG" | sed 's/^Release-//')
+
+        # Get the distance since the latest tag
+        DISTANCE=$(git rev-list --count "$LATEST_TAG"..HEAD)
+
+        # Append -SP<distance> if distance is greater than 0
+        if [ "$DISTANCE" -gt 0 ]; then
+        VERSION="$VERSION_NUMBER-SP$DISTANCE"
+        else
+        VERSION="$VERSION_NUMBER"
+        fi
+
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Using version: $VERSION"
+
     - name: Configure CMake
-      run: cmake -G Ninja -B build
+      run: cmake -G Ninja -B build -DVERSION=${{ steps.get_version.outputs.VERSION }}
 
     - name: Build with Ninja
       run: cmake --build build
@@ -65,22 +92,4 @@ jobs:
     - name: Publish DEB package to GitHub Packages
       run: |
         echo "${{ secrets.MY_PAT }}" | gh auth login --with-token
-        if gh release view "v1.0.0"; then
-          gh release delete "v1.0.0" -y
-        fi
-        gh release create "v1.0.0" build/*.deb --title "AudioTest v1.0.0" --notes "Release of AudioTest v1.0.0"
-        RELEASE_ID=$(gh api -X GET "repos/${{ github.repository }}/releases/tags/v1.0.0" --jq '.id')
-        DEB_FILE=$(ls build/*.deb)
-        # Get the asset ID of the existing DEB file (if it exists)
-        ASSET_NAME=$(basename "$DEB_FILE")
-        ASSET_ID=$(gh api -X GET "repos/${{ github.repository }}/releases/$RELEASE_ID/assets" --jq ".[] | select(.name == \"$ASSET_NAME\") | .id")
-        # Delete the existing asset (if it exists)
-        if [ -n "$ASSET_ID" ]; then
-          gh api -X DELETE "repos/${{ github.repository }}/releases/assets/$ASSET_ID"
-        fi
-        # Upload the new DEB file to the release
-        curl -X POST \
-          -H "Authorization: token ${{ secrets.MY_PAT }}" \
-          -H "Content-Type: $(file --mime-type -b "$DEB_FILE")" \
-          --data-binary @"$DEB_FILE" \
-          "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets?name=$ASSET_NAME"
+        gh release upload latest build/*.deb

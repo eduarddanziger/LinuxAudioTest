@@ -9,36 +9,45 @@
 
 // Custom deleter for snd_mixer_t
 struct MixerHandleDeleter {
-    void operator()(snd_mixer_t* handle) const {
-        if (handle) {
+    void operator()(snd_mixer_t * handle) const
+    {
+        if (handle)
+        {
             snd_mixer_close(handle);
         }
     }
 };
+
 using MixerHandleRaiiPtr = std::unique_ptr<snd_mixer_t, MixerHandleDeleter>;
 
 struct SimpleMixerElementDeleter {
-    void operator()(snd_mixer_selem_id_t* handle) const {
-        if (handle) {
+    void operator()(snd_mixer_selem_id_t * handle) const
+    {
+        if (handle)
+        {
             snd_mixer_selem_id_free(handle);
         }
     }
 };
+
 using SimpleMixerElementIdRaiiPtr = std::unique_ptr<snd_mixer_selem_id_t, SimpleMixerElementDeleter>;
 
-void CheckErrorAndThrowIfAny(int err, const std::string& message) {
-    if (err < 0) {
+void CheckErrorAndThrowIfAny(int err, const std::string & message)
+{
+    if (err < 0)
+    {
         throw std::runtime_error(message + ": " + snd_strerror(err));
     }
 }
 
 int main()
 {
-    try {
+    try
+    {
         // Set up spdlog to log to both console and file
         const auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         const auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("AudioTest.log", true);
-        std::vector<spdlog::sink_ptr> sinks {consoleSink, fileSink};
+        std::vector<spdlog::sink_ptr> sinks{consoleSink, fileSink};
         const auto logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(), sinks.end());
         spdlog::set_default_logger(logger);
         spdlog::set_level(spdlog::level::info); // Set global log level to info
@@ -69,7 +78,8 @@ int main()
         }
 
         CheckErrorAndThrowIfAny(snd_mixer_attach(handleSmartPtr.get(), "default"), "Error attaching mixer");
-        CheckErrorAndThrowIfAny(snd_mixer_selem_register(handleSmartPtr.get(), nullptr, nullptr), "Error registering mixer element");
+        CheckErrorAndThrowIfAny(snd_mixer_selem_register(handleSmartPtr.get(), nullptr, nullptr),
+                                "Error registering mixer element");
         CheckErrorAndThrowIfAny(snd_mixer_load(handleSmartPtr.get()), "Error loading mixer elements");
 
         long minVolume, maxVolume, currentVolume;
@@ -77,7 +87,8 @@ int main()
         SimpleMixerElementIdRaiiPtr elementIdSmartPtr;
         {
             snd_mixer_selem_id_t * simpleMixerElementIdTmp;
-            CheckErrorAndThrowIfAny(snd_mixer_selem_id_malloc(&simpleMixerElementIdTmp), "Can not allocate Mixer Simple Element Id structure");
+            CheckErrorAndThrowIfAny(snd_mixer_selem_id_malloc(&simpleMixerElementIdTmp),
+                                    "Can not allocate Mixer Simple Element Id structure");
             elementIdSmartPtr = SimpleMixerElementIdRaiiPtr(simpleMixerElementIdTmp);
         }
 
@@ -90,8 +101,11 @@ int main()
             throw std::runtime_error("Element not found!");
         }
 
-        CheckErrorAndThrowIfAny(snd_mixer_selem_get_playback_volume_range(mixerElement, &minVolume, &maxVolume), "Error getting min / max volume");
-        CheckErrorAndThrowIfAny(snd_mixer_selem_get_playback_volume(mixerElement, SND_MIXER_SCHN_FRONT_LEFT, &currentVolume), "Error getting current volume");
+        CheckErrorAndThrowIfAny(snd_mixer_selem_get_playback_volume_range(mixerElement, &minVolume, &maxVolume),
+                                "Error getting min / max volume");
+        CheckErrorAndThrowIfAny(
+            snd_mixer_selem_get_playback_volume(mixerElement, SND_MIXER_SCHN_FRONT_LEFT, &currentVolume),
+            "Error getting current volume");
 
         spdlog::info("Current volume is: {}, between min {} and max {}.", currentVolume, minVolume, maxVolume);
         spdlog::info(
@@ -104,10 +118,12 @@ int main()
             newVolume = maxVolume / 2;
         }
 
-        CheckErrorAndThrowIfAny(snd_mixer_selem_set_playback_volume_all(mixerElement, newVolume), "Error setting playback volume");
+        CheckErrorAndThrowIfAny(snd_mixer_selem_set_playback_volume_all(mixerElement, newVolume),
+                                "Error setting playback volume");
         spdlog::info("Volume set to {}", newVolume);
-
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception & e)
+    {
         spdlog::error("...Ended with an exception: {}", e.what());
         return 1;
     }

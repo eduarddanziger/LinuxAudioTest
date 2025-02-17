@@ -65,8 +65,9 @@ jobs:
     - name: Publish DEB package to GitHub Packages
       run: |
         echo "${{ secrets.MY_PAT }}" | gh auth login --with-token
+        DEB_FILE=$(ls build/*.deb)
         curl -X POST \
           -H "Authorization: token ${{ secrets.MY_PAT }}" \
-          -H "Content-Type: $(file --mime-type -b build/*.deb)" \
-          --data-binary @build/*.deb \
-          "https://uploads.github.com/repos/${{ github.repository }}/releases/latest/assets?name=$(basename build/*.deb)"
+          -H "Content-Type: $(file --mime-type -b "$DEB_FILE")" \
+          --data-binary @"$DEB_FILE" \
+          "https://uploads.github.com/repos/${{ github.repository }}/releases/latest/assets?name=$(basename "$DEB_FILE")"

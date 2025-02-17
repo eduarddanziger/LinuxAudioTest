@@ -1,0 +1,60 @@
+name: Build and Upload DEB Package
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install GitHub CLI
+      run: sudo apt-get install -y gh
+
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up CMake
+      uses: lukka/get-cmake@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build libasound2-dev libfmt-dev libspdlog-dev
+
+    - name: Configure CMake
+      run: cmake -G Ninja -B build
+
+    - name: Build with Ninja
+      run: cmake --build build
+
+    - name: Package with CPack
+      run: cmake --build build --target package
+
+    - name: Upload DEB package to GitHub Packages
+      uses: actions/upload-artifact@v2
+      with:
+        name: AudioTest-deb
+        path: build/*.deb
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download DEB package
+      uses: actions/download-artifact@v2
+      with:
+        name: AudioTest-deb
+        path: build
+
+    - name: Publish DEB package to GitHub Packages
+      run: |
+        echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+        gh release create "v1.0.0" build/*.deb --title "AudioTest v1.0.0" --notes "Release of AudioTest v1.0.0"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

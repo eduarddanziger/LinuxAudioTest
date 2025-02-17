@@ -24,12 +24,13 @@ endif()
 set(CMAKE_BUILD_TYPE Debug)
 
 find_package(fmt REQUIRED)
+find_package(spdlog REQUIRED)
 
 # Include directories
-target_include_directories(AudioTest PRIVATE "/usr/include/alsa" "/usr/include/fmt")
+target_include_directories(AudioTest PRIVATE "/usr/include/alsa" "/usr/include/fmt" "/usr/include/spdlog")
 
 # Link libraries
-target_link_libraries(AudioTest PRIVATE asound fmt::fmt)
+target_link_libraries(AudioTest PRIVATE asound fmt::fmt spdlog::spdlog)
 
 # Set C++ standard
 if (CMAKE_VERSION VERSION_GREATER 3.12)
@@ -61,7 +62,7 @@ set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "AudioTest is a test application for audio processing.")
 
 # Specify the dependencies (for DEB packages)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libasound2, libfmt-dev")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libasound2, libfmt-dev, libspdlog-dev")
 
 # Specify the installation paths
 install(TARGETS AudioTest DESTINATION bin)

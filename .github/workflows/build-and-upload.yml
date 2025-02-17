@@ -20,7 +20,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set up CMake
-      uses: lukka/get-cmake@v3
+      uses: lukka/get-cmake@latest
 
     - name: Install dependencies
       run: |
@@ -47,7 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Download DEB package
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: AudioTest-deb
         path: build

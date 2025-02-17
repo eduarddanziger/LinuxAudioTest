@@ -90,7 +90,8 @@ jobs:
         name: AudioTest-deb
         path: build
 
-    - name: Publish DEB package to GitHub Packages
+    - name: Create Release
       run: |
+        VERS=${{ jobs.build.steps.get_version.outputs.VERSION }}
         echo "${{ secrets.MY_PAT }}" | gh auth login --with-token
-        gh release upload latest build/*.deb
+        gh release create "$VERS" build/*.deb --title "AudioTest $VERS" --notes "Release of AudioTest $VERS"

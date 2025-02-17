@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -17,7 +18,7 @@ jobs:
       run: sudo apt-get install -y gh
 
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up CMake
       uses: lukka/get-cmake@latest
@@ -36,18 +37,24 @@ jobs:
     - name: Package with CPack
       run: cmake --build build --target package
 
+    - name: Verify DEB package
+      run: |
+        dpkg -c build/*.deb
+
     - name: Upload DEB package to GitHub Packages
       uses: actions/upload-artifact@v4
       with:
         name: AudioTest-deb
         path: build/*.deb
+        overwrite: true
 
   publish:
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Download DEB package
       uses: actions/download-artifact@v4
@@ -58,7 +65,4 @@ jobs:
     - name: Publish DEB package to GitHub Packages
       run: |
         echo "${{ secrets.MY_PAT }}" | gh auth login --with-token
-        if gh release view "v1.0.0"; then
-          gh release delete "v1.0.0" -y
-        fi
-        gh release create "v1.0.0" build/*.deb --title "AudioTest v1.0.0" --notes "Release of AudioTest v1.0.0"
+        gh package upload --package-type deb --package-name AudioTest --package-version 1.0.0 build/*.deb

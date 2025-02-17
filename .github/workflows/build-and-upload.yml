@@ -65,10 +65,13 @@ jobs:
     - name: Publish DEB package to GitHub Packages
       run: |
         echo "${{ secrets.MY_PAT }}" | gh auth login --with-token
+        if gh release view "v1.0.0"; then
+          gh release delete "v1.0.0" -y
+        fi
+        release_id=$(gh release create "v1.0.0" build/*.deb --title "AudioTest v1.0.0" --notes "Release of AudioTest v1.0.0" | jq -r .id)
         DEB_FILE=$(ls build/*.deb)
-        echo $DEB_FILE
         curl -X POST \
           -H "Authorization: token ${{ secrets.MY_PAT }}" \
           -H "Content-Type: $(file --mime-type -b "$DEB_FILE")" \
           --data-binary @"$DEB_FILE" \
-          "https://uploads.github.com/repos/${{ github.repository }}/releases/latest/assets?name=$(basename "$DEB_FILE")"
+          "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=$(basename "$DEB_FILE")"

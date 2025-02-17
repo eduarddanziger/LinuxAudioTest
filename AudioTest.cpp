@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <alsa/asoundlib.h>
 #include <spdlog/spdlog.h>
-#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <memory>
 #include <stdexcept>
@@ -44,9 +44,9 @@ int main()
 {
     try
     {
-        // Set up spdlog to log to both console and file
+        // Set up spdlog to log to both console and rotating file
         const auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        const auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("AudioTest.log", true);
+        const auto fileSink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>("AudioTest.log", 10240, 3);
         std::vector<spdlog::sink_ptr> sinks{consoleSink, fileSink};
         const auto logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(), sinks.end());
         spdlog::set_default_logger(logger);

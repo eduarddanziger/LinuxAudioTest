@@ -12,6 +12,8 @@ jobs:
   build:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.VERSION }}  # Output the VERSION variable
 
     steps:
     - name: Install GitHub CLI
@@ -92,6 +94,6 @@ jobs:
 
     - name: Create Release
       run: |
-        VERS=${{ jobs.build.steps.get_version.outputs.VERSION }}
+        VERS={{ needs.build.outputs.version }}
         echo "${{ secrets.MY_PAT }}" | gh auth login --with-token
         gh release create "$VERS" build/*.deb --title "AudioTest $VERS" --notes "Release of AudioTest $VERS"

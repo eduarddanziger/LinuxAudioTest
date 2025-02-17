@@ -69,9 +69,10 @@ jobs:
           gh release delete "v1.0.0" -y
         fi
         gh release create "v1.0.0" build/*.deb --title "AudioTest v1.0.0" --notes "Release of AudioTest v1.0.0"
+        RELEASE_ID=$(gh api -X GET "repos/${{ github.repository }}/releases/tags/v1.0.0" --jq '.id')
         DEB_FILE=$(ls build/*.deb)
         curl -X POST \
           -H "Authorization: token ${{ secrets.MY_PAT }}" \
           -H "Content-Type: $(file --mime-type -b "$DEB_FILE")" \
           --data-binary @"$DEB_FILE" \
-          "https://uploads.github.com/repos/${{ github.repository }}/releases/v1.0.0/assets?name=$(basename "$DEB_FILE")"
+          "https://uploads.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID/assets?name=$(basename "$DEB_FILE")"

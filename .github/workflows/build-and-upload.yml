@@ -94,6 +94,6 @@ jobs:
 
     - name: Create Release
       run: |
-        VERS={{ needs.build.outputs.version }}
+        VERS=${{ needs.build.outputs.version }}
         echo "${{ secrets.MY_PAT }}" | gh auth login --with-token
         gh release create "$VERS" build/*.deb --title "AudioTest $VERS" --notes "Release of AudioTest $VERS"

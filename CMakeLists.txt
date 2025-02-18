@@ -39,7 +39,7 @@ endif()
 
 # Set the package name and version
 set(CPACK_PACKAGE_NAME "AudioTest")
-set(CPACK_PACKAGE_VERSION "1.0.0")
+set(CPACK_PACKAGE_VERSION ${CPACK_PKG_VERSION})
 
 # Set the package contact information
 set(CPACK_PACKAGE_CONTACT "Eduard Danziger <edanziger@gmx.de>")

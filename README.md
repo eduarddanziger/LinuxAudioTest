@@ -1,6 +1,6 @@
-# AudioTest
+# LinuxAudioTest
 
-AudioTest is a test application for audio processing using ALSA (Advanced Linux Sound Architecture) and the `fmt` library in C++. It demonstrates basic audio input/output functionalities and serves as a starting point for audio-related projects.
+LinuxAudioTest is a test application for audio processing using ALSA (Advanced Linux Sound Architecture) and the `fmt` library in C++. It demonstrates basic audio input/output functionalities and serves as a starting point for audio-related projects.
 
 ## Features
 

@@ -56,6 +56,7 @@ jobs:
           # Increment the third number
           VERSION_NUMBER=$(echo "$VERSION_NUMBER" | awk -F. -v OFS=. '{$3++; print}')
           # Add SP info
+          DISTANCE=$(printf "%03d" "$DISTANCE")
           VERSION="$VERSION_NUMBER-SP$DISTANCE"
         else
           VERSION="$VERSION_NUMBER"

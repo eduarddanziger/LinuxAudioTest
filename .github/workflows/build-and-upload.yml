@@ -7,6 +7,9 @@ on:
     tags:
       - 'Release-*'
   
+permissions:
+  contents: write
+
 jobs:
   build:
     if: github.ref != 'refs/pull/develop'

@@ -7,6 +7,7 @@
 #include <memory>
 #include <stdexcept>
 #include <filesystem>
+#include "cpversion.h" // Include the generated version header
 
 // Custom deleter for snd_mixer_t
 struct MixerHandleDeleter {
@@ -41,8 +42,18 @@ void CheckErrorAndThrowIfAny(int err, const std::string & message)
     }
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    // Check for version option
+    for (int i = 1; i < argc; ++i)
+    {
+        if (std::string(argv[i]) == "--version" || std::string(argv[i]) == "-v")
+        {
+            std::cout << "AudioTest version " << VERSION << std::endl;
+            return 0;
+        }
+    }
+
     try
     {
         // Create logs directory if it doesn't exist
@@ -59,7 +70,7 @@ int main()
 
         // Set custom log pattern (excluding logger name)
         spdlog::set_pattern("%^%Y-%m-%d %H:%M:%S.%e [%l] %v%$");
-        spdlog::info("Starting...");
+        spdlog::info("Version {}, starting...", VERSION);
 
         {
             constexpr auto envName = "PULSE_SERVER";
@@ -129,10 +140,10 @@ int main()
     }
     catch (const std::exception & e)
     {
-        spdlog::error("...Ended with an exception: {}", e.what());
+        spdlog::error("...Version {}, ended with an exception: {}", VERSION, e.what());
         return 1;
     }
-    spdlog::info("...Ended successfully");
+    spdlog::info("...Version {}, ended successfully...", VERSION);
 
     return 0;
 }

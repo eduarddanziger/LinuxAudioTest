@@ -27,7 +27,7 @@ find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 
 # Include directories
-target_include_directories(AudioTest PRIVATE "/usr/include/alsa" "/usr/include/fmt" "/usr/include/spdlog")
+target_include_directories(AudioTest PRIVATE "/usr/include/alsa" "/usr/include/fmt" "/usr/include/spdlog" ${CMAKE_BINARY_DIR})
 
 # Link libraries
 target_link_libraries(AudioTest PRIVATE asound fmt::fmt spdlog::spdlog)
@@ -41,6 +41,9 @@ endif()
 set(CPACK_PACKAGE_NAME "AudioTest")
 set(CPACK_PACKAGE_VERSION ${CPACK_PKG_VERSION})
 set(CPACK_PACKAGE_VERSION "1.0.0" CACHE STRING "Package version" FORCE)
+
+# Configure cpversion.h from cpversion.h.in
+configure_file(${CMAKE_SOURCE_DIR}/cpversion.h.in ${CMAKE_BINARY_DIR}/cpversion.h @ONLY)
 
 # Set the package contact information
 set(CPACK_PACKAGE_CONTACT "Eduard Danziger <edanziger@gmx.de>")
